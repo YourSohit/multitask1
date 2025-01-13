@@ -4,7 +4,7 @@ from config import *
 from database import add_user, increment_task_count, decrement_task_count, get_task_count, is_premium, set_premium, get_user_plan
 
 try:
-    from moviepy import VideoFileClip, vfx
+    from moviepy.editor import VideoFileClip
     from io import BytesIO
     from PIL import Image, ImageDraw, ImageFont
     import os
@@ -174,17 +174,12 @@ def generate_sample_video_callback(client, callback_query):
     temp_file_path = app.download_media(video_file_id)
     video = VideoFileClip(temp_file_path)
 
-    # Trim a random 30-second segment
+    # Trim a 30-second segment (last 30 seconds of the video)
     if video.duration > 30:
-        start_time = video.duration - 30
-        end_time = video.duration
-        sample_video = video.fx(vfx.crop, start_time=start_time, end_time=end_time)
+        start_time = max(0, video.duration - 30)
+        sample_video = video.subclip(start_time, video.duration)
     else:
         sample_video = video
-
-    # Add watermark
-    watermark_text = "TCP Bots"
-    sample_video = sample_video.set_duration(30).fx(vfx.add_text, watermark_text, fontsize=50, color="white", x=10, y=10)
 
     # Save the sample video to a file
     output_path = f"sample_video_{user_id}.mp4"
